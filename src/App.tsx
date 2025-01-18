@@ -1,4 +1,4 @@
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { Input } from './components/ui/input';
 import {
 	acAtom,
@@ -16,7 +16,7 @@ import { Tooltip, TooltipTrigger } from './components/ui/tooltip';
 import { TooltipContent } from '@radix-ui/react-tooltip';
 import { Button } from './components/ui/button';
 import { Card, CardContent, CardHeader } from './components/ui/card';
-import { H1, H2, InlineCode, P } from './components/ui/typography';
+import { H1, H2, InlineCode } from './components/ui/typography';
 import { Switch } from './components/ui/switch';
 import {
 	Select,
@@ -75,7 +75,7 @@ const HitLine = (props: Partial<ComponentProps<'div'>>) => {
 		return twMerge(inHitStyle, isWeakSpotStyle, isDodgeStyle);
 	};
 	const inHitWindow = useInHitWindow();
-	const inDodgeWindow = useInDodgeWindow(weakSpot);
+	const inDodgeWindow = useInDodgeWindow();
 	return (
 		<div {...props} className={twMerge('flex gap-2', props.className)}>
 			{Array.from({ length: 20 }, (_x, i) => i + 1).map(el => {
@@ -121,8 +121,7 @@ const HitLine = (props: Partial<ComponentProps<'div'>>) => {
 const Inputs = () => {
 	const [weakSpot, setWeakSpot] = useAtom(weakSpotAtom);
 	const [ac, setAc] = useAtom(acAtom);
-	const [ProficiencyBonus, setProficiencyBonus] =
-		useAtom(proficiencyBonusAtom);
+	const setProficiencyBonus = useSetAtom(proficiencyBonusAtom);
 	return (
 		<div className="flex gap-8">
 			<div className="grid gap-2 grid-cols-2 grid-rows-2 col-start-1">

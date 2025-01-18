@@ -1,4 +1,4 @@
-import { atom, useAtom, useAtomValue } from 'jotai';
+import { atom, useAtomValue } from 'jotai';
 
 const internalWeakSpotAtom = atom(10);
 export const weakSpotAtom = atom(
@@ -17,8 +17,6 @@ export const hitWindowAtom = atom(get => {
 	const weakSpot = get(weakSpotAtom);
 	const internalWeakSpot = get(internalWeakSpotAtom);
 	const ac = get(acAtom);
-	const dodgeOffset = get(dodgeOffsetAtom);
-	const dodgeSign = get(dodgeSignAtom);
 	const hitWindowLen = Math.max(20 - ac, 0);
 	const rightPadding = hitWindowLen % 2;
 	const halfLen = Math.floor(hitWindowLen / 2);
@@ -42,7 +40,7 @@ export const useInInternalHitWindow = () => {
 		value >= range.internalHitWindow.start &&
 		value <= range.internalHitWindow.end;
 };
-export const useInDodgeWindow = (value: number) => {
+export const useInDodgeWindow = () => {
 	const inHitWindow = useInHitWindow();
 	const inInternalHitWindow = useInInternalHitWindow();
 	return (value: number) => inInternalHitWindow(value) && !inHitWindow(value);
