@@ -1,13 +1,13 @@
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Input } from './components/ui/input';
 import {
 	acAtom,
 	DodgeState,
 	dodgeStateAtom,
+	parryAtom,
 	proficiencyBonusAtom,
-	useInDodgeWindow,
-	useInHitWindow,
 	weakSpotAtom,
+	avoidedTextAtom,
 } from './state';
 import { Label } from './components/ui/label';
 import { twMerge } from 'tailwind-merge';
@@ -29,7 +29,7 @@ import {
 export const App = () => {
 	return (
 		<div className="h-screen w-screen p-4">
-			<main className="h-full w-full items-center place-content-center flex flex-col gap-4">
+			<main className="h-full w-full items-center place-content-center flex flex-col gap-8">
 				<H1>~ Kingless Hit Visualizer ~</H1>
 				<Inputs />
 				<HitLine className="" />
@@ -67,21 +67,26 @@ export const App = () => {
 };
 
 const HitLine = (props: Partial<ComponentProps<'div'>>) => {
-	const [weakSpot, setWeakSpot] = useAtom(weakSpotAtom);
+	const setWeakSpot = useSetAtom(weakSpotAtom);
+	const avoidedText = useAtomValue(avoidedTextAtom);
 	const numberStyle = (el: number) => {
-		const inHitStyle = inHitWindow(el) ? 'text-orange-400' : '';
-		const isWeakSpotStyle = el === weakSpot ? 'text-red-500 font-bold' : '';
-		const isDodgeStyle = inDodgeWindow(el) ? 'text-cyan-500' : '';
-		return twMerge(inHitStyle, isWeakSpotStyle, isDodgeStyle);
+		const avoid = avoidedText(el);
+		if (avoid === 'Dodge') {
+			return 'text-cyan-500';
+		} else if (avoid === 'Parry') {
+			return 'text-pink-500';
+		} else if (avoid === 'Hit') {
+			return 'text-orange-400';
+		} else if (avoid === 'Critical Hit') {
+			return 'text-red-500 font-bold';
+		} else {
+			return '';
+		}
 	};
-	const inHitWindow = useInHitWindow();
-	const inDodgeWindow = useInDodgeWindow();
 	return (
 		<div {...props} className={twMerge('flex gap-2', props.className)}>
 			{Array.from({ length: 20 }, (_x, i) => i + 1).map(el => {
 				const style = numberStyle(el);
-				const hit = inHitWindow(el);
-				const dodge = inDodgeWindow(el);
 				return (
 					<Tooltip key={el}>
 						<TooltipTrigger asChild>
@@ -97,19 +102,11 @@ const HitLine = (props: Partial<ComponentProps<'div'>>) => {
 						</TooltipTrigger>
 						<TooltipContent
 							className={twMerge(
-								'outline-1 outline-white',
+								'outline-[1px] outline-zinc-700 bg-opacity-100 bg-background p-2 rounded-md outline',
 								style
 							)}
 						>
-							<p>
-								{hit
-									? weakSpot == el
-										? 'Critical Hit'
-										: 'Hit'
-									: dodge
-									? 'Dodge'
-									: 'Miss'}
-							</p>
+							<p>{avoidedText(el)}</p>
 						</TooltipContent>
 					</Tooltip>
 				);
@@ -123,9 +120,9 @@ const Inputs = () => {
 	const [ac, setAc] = useAtom(acAtom);
 	const setProficiencyBonus = useSetAtom(proficiencyBonusAtom);
 	return (
-		<div className="flex gap-8">
-			<div className="grid gap-2 grid-cols-2 grid-rows-2 col-start-1">
-				<div className="col-start-1 col-span-1 flex gap-2 items-center">
+		<div className="flex gap-2 flex-col items-center">
+			<div className="grid gap-2 auto-cols-min grid-rows-2">
+				<div className="col-start-1 col-span-1 flex gap-2 items-center mx-8">
 					<img
 						src="https://terraria.wiki.gg/images/5/53/Lead_Broadsword.png"
 						alt=""
@@ -145,7 +142,7 @@ const Inputs = () => {
 					defaultValue={weakSpot}
 					onChange={e => setWeakSpot(parseInt(e.target.value))}
 				/>
-				<div className="flex gap-2 items-center col-start-1 col-span-1">
+				<div className="flex gap-2 items-center col-start-1 col-span-1 mx-8">
 					<img
 						src="https://terraria.wiki.gg/images/7/7a/Lead_Chainmail.png"
 						alt=""
@@ -166,20 +163,25 @@ const Inputs = () => {
 					onChange={e => setAc(parseInt(e.target.value))}
 				/>
 			</div>
-			<div>
-				<Label htmlFor="proficiency-bonus">Proficiency bonus</Label>
-				<Input
-					type="number"
-					className="w-28"
-					id="proficiency-bonus"
-					defaultValue={2}
-					onChange={e =>
-						setProficiencyBonus(parseInt(e.target.value))
-					}
-				/>
-			</div>
-			<div className="col-start-2">
-				<DodgeInput />
+			<div className="grid gap-8 grid-cols-3 grid-rows-1 justify-items-center items-center">
+				<div>
+					<Label htmlFor="proficiency-bonus">Proficiency bonus</Label>
+					<Input
+						type="number"
+						className="w-28"
+						id="proficiency-bonus"
+						defaultValue={2}
+						onChange={e =>
+							setProficiencyBonus(parseInt(e.target.value))
+						}
+					/>
+				</div>
+				<div className="col-start-2">
+					<DodgeInput />
+				</div>
+				<div className="col-start-3">
+					<ParryInput />
+				</div>{' '}
 			</div>
 		</div>
 	);
@@ -187,6 +189,7 @@ const Inputs = () => {
 
 const DodgeInput = (props: ComponentProps<'div'>) => {
 	const [dodgeState, setDodgeState] = useAtom(dodgeStateAtom);
+	const parryState = useAtomValue(parryAtom);
 	return (
 		<div
 			{...props}
@@ -194,6 +197,7 @@ const DodgeInput = (props: ComponentProps<'div'>) => {
 		>
 			<div className="flex gap-2 items-center">
 				<Switch
+					disabled={parryState}
 					onCheckedChange={value =>
 						setDodgeState(value ? 'left' : 'disabled')
 					}
@@ -207,6 +211,7 @@ const DodgeInput = (props: ComponentProps<'div'>) => {
 			</div>
 			<Select
 				disabled={dodgeState === 'disabled'}
+				defaultValue={'left'}
 				onValueChange={value => setDodgeState(value as DodgeState)}
 			>
 				<SelectTrigger className="w-[180px]">
@@ -217,6 +222,28 @@ const DodgeInput = (props: ComponentProps<'div'>) => {
 					<SelectItem value="right">Right</SelectItem>
 				</SelectContent>{' '}
 			</Select>
+		</div>
+	);
+};
+
+const ParryInput = (props: ComponentProps<'div'>) => {
+	const [parryState, setParryState] = useAtom(parryAtom);
+	const dodgeState = useAtomValue(dodgeStateAtom);
+	return (
+		<div
+			{...props}
+			className={twMerge(props.className, 'flex gap-2 items-center')}
+		>
+			<Switch
+				disabled={dodgeState !== 'disabled'}
+				onCheckedChange={value => setParryState(value)}
+				defaultChecked={parryState}
+				id="parry-enabled"
+				className="data-[state=checked]:bg-pink-500"
+			/>
+			<Label htmlFor="parry-enabled" className="text-pink-500">
+				Parry
+			</Label>
 		</div>
 	);
 };

@@ -11,7 +11,18 @@ export const weakSpotAtom = atom(
 		set(internalWeakSpotAtom, value);
 	}
 );
-export const acAtom = atom(15);
+export const internalACAtom = atom(15);
+export const acAtom = atom(
+	get => {
+		const ac = get(internalACAtom);
+		const proficiencyBonus = get(proficiencyBonusAtom);
+		const parry = get(parryAtom);
+		return parry ? ac + proficiencyBonus : ac;
+	},
+	(_get, set, value: number) => {
+		set(internalACAtom, value);
+	}
+);
 
 export const hitWindowAtom = atom(get => {
 	const weakSpot = get(weakSpotAtom);
@@ -20,31 +31,35 @@ export const hitWindowAtom = atom(get => {
 	const hitWindowLen = Math.max(20 - ac, 0);
 	const rightPadding = hitWindowLen % 2;
 	const halfLen = Math.floor(hitWindowLen / 2);
+	const internalAc = get(internalACAtom);
+	const internalHitWindowLen = Math.max(20 - internalAc, 0);
+	const internalRightPadding = internalHitWindowLen % 2;
+	const internalHalfLen = Math.floor(internalHitWindowLen / 2);
 	return {
 		internalHitWindow: {
-			start: internalWeakSpot - halfLen,
-			end: internalWeakSpot + halfLen + rightPadding,
+			start: internalWeakSpot - internalHalfLen,
+			end: internalWeakSpot + internalHalfLen + internalRightPadding,
 		},
 		start: weakSpot - halfLen,
 		end: weakSpot + halfLen + rightPadding,
 	};
 });
 
-export const useInHitWindow = () => {
-	const range = useAtomValue(hitWindowAtom);
+export const inHitWindowAtom = atom(get => {
+	const range = get(hitWindowAtom);
 	return (value: number) => value >= range.start && value <= range.end;
-};
-export const useInInternalHitWindow = () => {
-	const range = useAtomValue(hitWindowAtom);
+});
+export const inInternalHitWindowAtom = atom(get => {
+	const range = get(hitWindowAtom);
 	return (value: number) =>
 		value >= range.internalHitWindow.start &&
 		value <= range.internalHitWindow.end;
-};
-export const useInDodgeWindow = () => {
-	const inHitWindow = useInHitWindow();
-	const inInternalHitWindow = useInInternalHitWindow();
+});
+export const avoidedAttackAtom = atom(get => {
+	const inHitWindow = get(inHitWindowAtom);
+	const inInternalHitWindow = get(inInternalHitWindowAtom);
 	return (value: number) => inInternalHitWindow(value) && !inHitWindow(value);
-};
+});
 
 export type DodgeState = 'left' | 'right' | 'disabled';
 export const dodgeStateAtom = atom<DodgeState>('disabled');
@@ -57,3 +72,28 @@ export const dodgeOffsetAtom = atom(get => {
 	return dodgeSign * get(proficiencyBonusAtom);
 });
 export const proficiencyBonusAtom = atom(2);
+
+export const parryAtom = atom(false);
+
+export const avoidedTextAtom = atom(get => {
+	const weakSpot = get(weakSpotAtom);
+	const dodgeState = get(dodgeStateAtom);
+	const parryState = get(parryAtom);
+	const avoidedAttack = get(avoidedAttackAtom);
+	const inHitWindow = get(inHitWindowAtom);
+	return (value: number) => {
+		if (value === weakSpot) {
+			return 'Critical Hit';
+		}
+		if (avoidedAttack(value)) {
+			if (dodgeState !== 'disabled') {
+				return 'Dodge';
+			} else if (parryState) {
+				return 'Parry';
+			}
+		} else {
+			return inHitWindow(value) ? 'Hit' : 'Miss';
+		}
+		return 'Miss';
+	};
+});
