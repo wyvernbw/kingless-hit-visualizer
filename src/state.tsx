@@ -1,4 +1,4 @@
-import { atom, useAtomValue } from 'jotai';
+import { atom } from 'jotai';
 
 const internalWeakSpotAtom = atom(10);
 export const weakSpotAtom = atom(
@@ -56,9 +56,18 @@ export const inInternalHitWindowAtom = atom(get => {
 		value <= range.internalHitWindow.end;
 });
 export const avoidedAttackAtom = atom(get => {
+	const hitWindow = get(hitWindowAtom);
 	const inHitWindow = get(inHitWindowAtom);
 	const inInternalHitWindow = get(inInternalHitWindowAtom);
-	return (value: number) => inInternalHitWindow(value) && !inHitWindow(value);
+	return (value: number) => {
+		const avoid = inInternalHitWindow(value) && !inHitWindow(value);
+		return (
+			avoid ||
+			(value > hitWindow.internalHitWindow.end &&
+				value < hitWindow.start) ||
+			(value > hitWindow.end && value < hitWindow.internalHitWindow.start)
+		);
+	};
 });
 
 export type DodgeState = 'left' | 'right' | 'disabled';
@@ -71,7 +80,13 @@ export const dodgeOffsetAtom = atom(get => {
 	const dodgeSign = get(dodgeSignAtom);
 	return dodgeSign * get(proficiencyBonusAtom);
 });
-export const proficiencyBonusAtom = atom(2);
+const internalProficiencyBonusAtom = atom(2);
+export const proficiencyBonusAtom = atom(
+	get => get(internalProficiencyBonusAtom),
+	(_, set, value: number) => {
+		set(internalProficiencyBonusAtom, Math.max(value, 0));
+	}
+);
 
 export const parryAtom = atom(false);
 
