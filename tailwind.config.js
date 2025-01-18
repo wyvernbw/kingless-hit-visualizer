@@ -4,7 +4,8 @@ export default {
   content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
 	fontFamily: {
-		'serif': ['"Jacquard 12"', 'sans-serif'],
+		'serif': ['alagard', 'sans-serif'],
+		'mono': ['Geist Mono', 'monospace'],
 	},
   	extend: {
   		borderRadius: {
