@@ -28,11 +28,15 @@ import {
 
 export const App = () => {
 	return (
-		<div className="h-screen w-screen p-4">
-			<main className="h-full w-full items-center place-content-center flex flex-col gap-8">
-				<H1>~ Kingless Hit Visualizer ~</H1>
-				<Inputs />
-				<HitLine className="" />
+		<div className="h-screen w-screen p-4 md:items-center md:justify-center flex flex-col">
+			<main className="h-full w-full md:items-center md:justify-center md:place-content-center flex lg:flex-col gap-8 md:flex-row flex-wrap max-w-max">
+				<div className="flex flex-row md:flex-col md:gap-4 gap-2 md:items-center">
+					<div className="flex flex-col gap-8 md:items-center max-w-max">
+						<H1 className="w-1/2">~ Kingless Hit Visualizer ~</H1>
+						<Inputs />
+					</div>
+					<HitLine className="flex-grow" />
+				</div>
 				<Card className="w-[30rem]">
 					<CardHeader>
 						<H2>Rule Reference</H2>
@@ -84,7 +88,13 @@ const HitLine = (props: Partial<ComponentProps<'div'>>) => {
 		}
 	};
 	return (
-		<div {...props} className={twMerge('flex gap-2', props.className)}>
+		<div
+			{...props}
+			className={twMerge(
+				'flex gap-2 flex-col md:flex-row ',
+				props.className
+			)}
+		>
 			{Array.from({ length: 20 }, (_x, i) => i + 1).map(el => {
 				const style = numberStyle(el);
 				return (
@@ -93,7 +103,10 @@ const HitLine = (props: Partial<ComponentProps<'div'>>) => {
 							<Button
 								variant="outline"
 								size="icon"
-								className={style}
+								className={twMerge(
+									style,
+									'w-6 h-6 aspect-square md:w-10 md:h-10'
+								)}
 								key={el}
 								onClick={() => setWeakSpot(el)}
 							>
@@ -120,13 +133,13 @@ const Inputs = () => {
 	const [ac, setAc] = useAtom(acAtom);
 	const setProficiencyBonus = useSetAtom(proficiencyBonusAtom);
 	return (
-		<div className="flex gap-2 flex-col items-center">
-			<div className="grid gap-2 auto-cols-min grid-rows-2">
-				<div className="col-start-1 col-span-1 flex gap-2 items-center mx-8">
+		<div className="flex gap-2 flex-col md:items-center  md:justify-normal max-w-max">
+			<div className="md:grid gap-2 auto-cols-min grid-rows-2 flex flex-col max-w-max">
+				<div className="md:col-start-1 md:col-span-1 flex md:gap-2 md:items-center md:mx-8 gap-4 w-min">
 					<img
 						src="https://terraria.wiki.gg/images/5/53/Lead_Broadsword.png"
 						alt=""
-						className="aspect-square h-[32px] [image-rendering:pixelated]"
+						className="aspect-square h-[32px] [image-rendering:pixelated] hidden md:block"
 					/>
 					<Label
 						className="text-red-500 flex gap-2 items-center"
@@ -137,16 +150,16 @@ const Inputs = () => {
 				</div>
 				<Input
 					id="weakspot-input"
-					className="w-28 text-[2rem] text-red-500 col-start-2"
+					className="min-w-16 max-w-min text-red-500 col-start-2"
 					type="number"
 					defaultValue={weakSpot}
 					onChange={e => setWeakSpot(parseInt(e.target.value))}
 				/>
-				<div className="flex gap-2 items-center col-start-1 col-span-1 mx-8">
+				<div className="flex gap-2 items-center col-start-1 col-span-1 md:mx-8 w-min">
 					<img
 						src="https://terraria.wiki.gg/images/7/7a/Lead_Chainmail.png"
 						alt=""
-						className="h-[24px] [image-rendering:pixelated]"
+						className="h-[24px] [image-rendering:pixelated] hidden md:block"
 					/>
 					<Label
 						className="flex gap-2 items-center col-start-1 col-span-1"
@@ -157,18 +170,18 @@ const Inputs = () => {
 				</div>
 				<Input
 					id="ac-input"
-					className="w-28 text-[2rem] col-start-2"
+					className="min-w-16 max-w-min col-start-2"
 					type="number"
 					defaultValue={ac}
 					onChange={e => setAc(parseInt(e.target.value))}
 				/>
 			</div>
-			<div className="grid gap-8 grid-cols-3 grid-rows-1 justify-items-center items-center">
+			<div className="md:grid flex flex-col gap-4 md:gap-8 grid-cols-1 grid-rows-3 md:grid-cols-3 md:grid-rows-1 md:justify-items-center md:items-center">
 				<div>
 					<Label htmlFor="proficiency-bonus">Proficiency bonus</Label>
 					<Input
 						type="number"
-						className="w-28"
+						className="min-w-16 max-w-min"
 						id="proficiency-bonus"
 						defaultValue={2}
 						onChange={e =>
@@ -176,10 +189,10 @@ const Inputs = () => {
 						}
 					/>
 				</div>
-				<div className="col-start-2">
+				<div className="md:col-start-2 md:row-start-1 row-start-2">
 					<DodgeInput />
 				</div>
-				<div className="col-start-3">
+				<div className="md:col-start-3 md:row-start-1 row-start-3">
 					<ParryInput />
 				</div>{' '}
 			</div>
@@ -214,7 +227,7 @@ const DodgeInput = (props: ComponentProps<'div'>) => {
 				defaultValue={'left'}
 				onValueChange={value => setDodgeState(value as DodgeState)}
 			>
-				<SelectTrigger className="w-[180px]">
+				<SelectTrigger className="min-w-16 max-w-min">
 					<SelectValue placeholder="Side" />
 				</SelectTrigger>
 				<SelectContent>
