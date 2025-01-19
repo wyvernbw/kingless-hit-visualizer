@@ -59,6 +59,17 @@ export const App = () => {
 								inflicts bleeding.
 							</li>
 							<li>
+								<span className="text-cyan-500">Dodge</span>:
+								Shift your weak spot to the left or right by
+								your proficiency bonus.
+							</li>
+							<li>
+								<span className="text-pink-500">Parry</span>:
+								Increase your AC by your proficiency bonus. If
+								an attack that would have normally hit misses,
+								it is parried.
+							</li>
+							<li>
 								Hit window = 20 - AC, hits outside of this
 								window are misses
 							</li>
