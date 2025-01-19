@@ -12,7 +12,7 @@ import {
 } from './state';
 import { Label } from './components/ui/label';
 import { twMerge } from 'tailwind-merge';
-import { ComponentProps, useRef, useState } from 'react';
+import { ComponentProps, useState } from 'react';
 import { Tooltip, TooltipTrigger } from './components/ui/tooltip';
 import { TooltipContent } from '@radix-ui/react-tooltip';
 import { Button } from './components/ui/button';
