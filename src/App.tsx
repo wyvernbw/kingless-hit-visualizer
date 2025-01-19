@@ -8,10 +8,11 @@ import {
 	proficiencyBonusAtom,
 	weakSpotAtom,
 	avoidedTextAtom,
+	internalWeakSpotAtom,
 } from './state';
 import { Label } from './components/ui/label';
 import { twMerge } from 'tailwind-merge';
-import { ComponentProps } from 'react';
+import { ComponentProps, useRef, useState } from 'react';
 import { Tooltip, TooltipTrigger } from './components/ui/tooltip';
 import { TooltipContent } from '@radix-ui/react-tooltip';
 import { Button } from './components/ui/button';
@@ -142,6 +143,7 @@ const HitLine = (props: Partial<ComponentProps<'div'>>) => {
 
 const Inputs = () => {
 	const [weakSpot, setWeakSpot] = useAtom(weakSpotAtom);
+	const internalWeakSpot = useAtomValue(internalWeakSpotAtom);
 	const [ac, setAc] = useAtom(acAtom);
 	const setProficiencyBonus = useSetAtom(proficiencyBonusAtom);
 	return (
@@ -165,7 +167,7 @@ const Inputs = () => {
 					className="min-w-16 max-w-min text-red-500 col-start-2"
 					type="number"
 					defaultValue={weakSpot}
-					value={weakSpot}
+					value={internalWeakSpot}
 					onChange={e => setWeakSpot(parseInt(e.target.value))}
 				/>
 				<div className="flex gap-2 items-center col-start-1 col-span-1 md:mx-8 w-min">
@@ -216,6 +218,7 @@ const Inputs = () => {
 const DodgeInput = (props: ComponentProps<'div'>) => {
 	const [dodgeState, setDodgeState] = useAtom(dodgeStateAtom);
 	const parryState = useAtomValue(parryAtom);
+	const [oldDodgeState, setOldDodgeState] = useState('left' as DodgeState);
 	return (
 		<div
 			{...props}
@@ -225,7 +228,7 @@ const DodgeInput = (props: ComponentProps<'div'>) => {
 				<Switch
 					disabled={parryState}
 					onCheckedChange={value =>
-						setDodgeState(value ? 'left' : 'disabled')
+						setDodgeState(value ? oldDodgeState : 'disabled')
 					}
 					defaultChecked={dodgeState !== 'disabled'}
 					id="dodge-enabled"
@@ -238,7 +241,10 @@ const DodgeInput = (props: ComponentProps<'div'>) => {
 			<Select
 				disabled={dodgeState === 'disabled'}
 				defaultValue={'left'}
-				onValueChange={value => setDodgeState(value as DodgeState)}
+				onValueChange={value => {
+					setDodgeState(value as DodgeState);
+					setOldDodgeState(value as DodgeState);
+				}}
 			>
 				<SelectTrigger className="min-w-16 max-w-min">
 					<SelectValue placeholder="Side" />

@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 
-const internalWeakSpotAtom = atom(10);
+export const internalWeakSpotAtom = atom(10);
 export const weakSpotAtom = atom(
 	get => {
 		const dodgeOffset = get(dodgeOffsetAtom);
