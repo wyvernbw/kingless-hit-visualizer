@@ -25,6 +25,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from './components/ui/select';
+import clsx from 'clsx';
 
 export const App = () => {
 	return (
@@ -153,6 +154,7 @@ const Inputs = () => {
 					className="min-w-16 max-w-min text-red-500 col-start-2"
 					type="number"
 					defaultValue={weakSpot}
+					value={weakSpot}
 					onChange={e => setWeakSpot(parseInt(e.target.value))}
 				/>
 				<div className="flex gap-2 items-center col-start-1 col-span-1 md:mx-8 w-min">
@@ -242,21 +244,33 @@ const DodgeInput = (props: ComponentProps<'div'>) => {
 const ParryInput = (props: ComponentProps<'div'>) => {
 	const [parryState, setParryState] = useAtom(parryAtom);
 	const dodgeState = useAtomValue(dodgeStateAtom);
+	const proficiencyBonus = useAtomValue(proficiencyBonusAtom);
 	return (
 		<div
 			{...props}
-			className={twMerge(props.className, 'flex gap-2 items-center')}
+			className={twMerge(props.className, 'flex flex-col gap-2')}
 		>
-			<Switch
-				disabled={dodgeState !== 'disabled'}
-				onCheckedChange={value => setParryState(value)}
-				defaultChecked={parryState}
-				id="parry-enabled"
-				className="data-[state=checked]:bg-pink-500"
-			/>
-			<Label htmlFor="parry-enabled" className="text-pink-500">
-				Parry
-			</Label>
+			<div className="flex gap-2 items-center">
+				<Switch
+					disabled={dodgeState !== 'disabled'}
+					onCheckedChange={value => setParryState(value)}
+					defaultChecked={parryState}
+					id="parry-enabled"
+					className="data-[state=checked]:bg-pink-500"
+				/>
+				<Label htmlFor="parry-enabled" className="text-pink-500">
+					Parry
+				</Label>
+			</div>
+			<span
+				aria-disabled={parryState}
+				className={clsx(
+					'text-pink-500',
+					!parryState && 'text-opacity-50'
+				)}
+			>
+				+{proficiencyBonus} AC
+			</span>
 		</div>
 	);
 };
